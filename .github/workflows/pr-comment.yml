@@ -6,6 +6,7 @@ on:
 
 env:
   PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+  PR_NUMBER: ${{ github.event.issue.number }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -24,15 +25,19 @@ jobs:
         id: comment-branch
       - uses: actions/checkout@v4
       - name: Checkout PR branch
-        run: gh pr checkout ${{ github.event.issue.number }}
-        env:
-          # TODO: Remove if not needed
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr checkout $PR_NUMBER
       - name: Check private key exists
-        # Potential alternative: https://github.com/myrotvorets/set-commit-status-action
         uses: actions/github-script@v6
         with:
           script: |
             if ("$PRIVATE_KEY" == "") {
               core.setFailed('Failed to access PRIVATE_KEY secret')
             }
+      - name: Comment on successful run
+        uses: peter-evans/create-or-update-comment@v3
+        with: 
+          issue-number: $PR_NUMBER
+          body: |
+            `!test` action succeeded! :rocket:
+
+            https://github.com/lurk-lab/ci-lab/actions/runs/${{ github.run_id }}

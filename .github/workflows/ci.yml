@@ -1,6 +1,9 @@
 name: Test access to secrets
 
 on: 
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [master]
   merge_group:
 
 env:
