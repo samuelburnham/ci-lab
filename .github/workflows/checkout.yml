@@ -1,0 +1,42 @@
+name: Checkout paths
+
+on:
+  push:
+
+jobs:
+  comparative-bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Install dependencies
+      - uses: actions-rs/toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just@1.15
+      - name: Install criterion
+        run: |
+          cargo install cargo-criterion
+          cargo install criterion-table
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+      - run: cp justfile bench.env main
+      - run: cd main && echo "BASE_REF=$(git rev-parse HEAD)" >> $GITHUB_ENV
+      # Run benchmark on base branch
+      - name: Run GPU bench
+        run: |
+          cd main && just --dotenv-filename bench.env gpu-bench fibonacci
+          cp ${{ env.BASE_REF }}.json ..
+      - run: ls -a
+      - run: echo ${{ env.BASE_REF }}
+      - name: Run GPU bench on source branch
+        run: just --dotenv-filename bench.env gpu-bench fibonacci
+      - name: Run `criterion-table`
+        run: cat ${{ github.sha }}.json | criterion-table > BENCHMARKS.md
+      - name: Write comparative bench on commit comment
+        uses: peter-evans/commit-comment@v3
+        with:
+          body-path: BENCHMARKS.md
+      - run: cat BENCHMARKS.md
