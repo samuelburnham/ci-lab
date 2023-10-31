@@ -33,11 +33,11 @@ jobs:
               core.setFailed('Failed to access PRIVATE_KEY secret')
             }
       - name: Get PR number
-      - run: echo ${{ github.event.issue.number }}
+        run: echo ${{ github.event.issue.number }}
       - name: Get PR number take 2
-      - run: echo $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+        run: echo $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
       - name: Get PR number take 3
-      - run: echo $(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+        run: echo $(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
       - name: Comment on successful run
         uses: peter-evans/create-or-update-comment@v3
         with: 
