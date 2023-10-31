@@ -4,9 +4,6 @@ on:
   issue_comment:
     types: [created]
 
-env:
-  PR_NUMBER: ${{ github.event.issue.number }}
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -35,16 +32,16 @@ jobs:
             if ("${{ secrets.PRIVATE_KEY }}" == "") {
               core.setFailed('Failed to access PRIVATE_KEY secret')
             }
-      # For some reason $PR_NUMBER doesn't register with `create-or-update-comment`
-      - id: find-pull-request
-        uses: jwalton/gh-find-current-pr@v1
-        with:
-          # Can be "open", "closed", or "all".  Defaults to "open".
-          state: open
+      - name: Get PR number
+      - run: echo ${{ github.event.issue.number }}
+      - name: Get PR number take 2
+      - run: echo $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+      - name: Get PR number take 3
+      - run: echo $(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
       - name: Comment on successful run
         uses: peter-evans/create-or-update-comment@v3
         with: 
-          issue-number: ${{ steps.find-pull-request.outputs.number }}
+          issue-number: ${{ github.event.issue.number }}
           body: |
             `!test` action succeeded! :rocket:
 
