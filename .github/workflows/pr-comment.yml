@@ -22,7 +22,7 @@ jobs:
         id: comment-branch
       - uses: actions/checkout@v4
       - name: Checkout PR branch
-        run: gh pr checkout $PR_NUMBER
+        run: gh pr checkout ${{ github.event.issue_number }}
         env:
           GH_TOKEN: ${{ github.token }}
       - name: Check private key exists
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: echo ${{ github.ref_name }}
       - name: Checkout PR branch
-        run: gh pr checkout $PR_NUMBER
+        run: gh pr checkout ${{ github.event.issue_number }}
         env:
           GH_TOKEN: ${{ github.token }}
       - uses: actions-rs/toolchain@v1
