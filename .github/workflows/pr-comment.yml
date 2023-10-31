@@ -55,7 +55,7 @@ jobs:
     steps:
       #- uses: xt0rted/pull-request-comment-branch@v2
       #  id: comment-branch
-      #- uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - run: echo ${{ github.ref_name }}
       - name: Checkout PR branch
         run: gh pr checkout $PR_NUMBER
