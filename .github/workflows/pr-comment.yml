@@ -5,7 +5,6 @@ on:
     types: [created]
 
 env:
-  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
   PR_NUMBER: ${{ github.event.issue.number }}
 
 concurrency:
@@ -13,13 +12,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  run-pr-comment:
+  test-secret:
+    name: Test access to secrets in a fork
     runs-on: ubuntu-latest
     if:
       github.event.issue.pull_request
       && github.event.issue.state == 'open'
       && contains(github.event.comment.body, '!test')
       && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER')
+    env:
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
     steps:
       - uses: xt0rted/pull-request-comment-branch@v2
         id: comment-branch
@@ -43,3 +45,27 @@ jobs:
             `!test` action succeeded! :rocket:
 
             https://github.com/lurk-lab/ci-lab/actions/runs/${{ github.run_id }}
+
+  test-bench:
+    name: Run benchmarks
+    runs-on: ubuntu-latest
+    if:
+      github.event.issue.pull_request
+      && github.event.issue.state == 'open'
+      && contains(github.event.comment.body, '!bench')
+      && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER')
+    steps:
+      #- uses: xt0rted/pull-request-comment-branch@v2
+      #  id: comment-branch
+      #- uses: actions/checkout@v4
+      - run: echo ${{ github.ref_name }}
+      - name: Checkout PR branch
+        run: gh pr checkout $PR_NUMBER
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - uses: actions-rs/toolchain@v1
+      - uses: Swatinem/rust-cache@v2
+      - uses: boa-dev/criterion-compare-action@v3
+        with:
+          # Needed. The name of the branch to compare with
+          branchName: ${{ github.ref_name }}
