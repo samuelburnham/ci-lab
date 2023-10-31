@@ -35,10 +35,16 @@ jobs:
             if ("${{ secrets.PRIVATE_KEY }}" == "") {
               core.setFailed('Failed to access PRIVATE_KEY secret')
             }
+      # For some reason $PR_NUMBER doesn't register with `create-or-update-comment`
+      - id: find-pull-request
+        uses: jwalton/gh-find-current-pr@v1
+        with:
+          # Can be "open", "closed", or "all".  Defaults to "open".
+          state: open
       - name: Comment on successful run
         uses: peter-evans/create-or-update-comment@v3
         with: 
-          issue-number: $PR_NUMBER
+          issue-number: ${{ steps.find-pull-request.outputs.number }}
           body: |
             `!test` action succeeded! :rocket:
 
