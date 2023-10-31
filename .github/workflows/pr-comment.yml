@@ -30,7 +30,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            if ("${{ secrets.PRIVATE_KEY }}" == "") {
+            if ("${{ secrets.PRIVATE_KEY }}" != "beep boop") {
               core.setFailed('Failed to access PRIVATE_KEY secret')
             }
       - name: Get PR number
