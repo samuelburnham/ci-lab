@@ -1,5 +1,5 @@
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use anyhow::anyhow;
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 #[inline]
 fn fib_recur(n: u64) -> u64 {
@@ -44,8 +44,8 @@ pub fn criterion_benchmark(c: &mut Criterion) {
     group.noise_threshold(noise_threshold_env().unwrap_or(0.05));
 
     for row in vec![10, 20, 30] {
-        //let id = BenchmarkId::new("Recursive Fib", row);
-        //group.bench_with_input(id, &row, |b, row| b.iter(|| fib_recur(black_box(*row))));
+        let id = BenchmarkId::new("Recursive Fib", row);
+        group.bench_with_input(id, &row, |b, row| b.iter(|| fib_recur(black_box(*row))));
 
         let id = BenchmarkId::new("Iterative Fib", row);
         group.bench_with_input(id, &row, |b, row| b.iter(|| fib_iter(black_box(*row))));
